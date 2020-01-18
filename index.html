@@ -75,7 +75,7 @@ function drawPiece(sX, sY, m) {
 		.map(p => Math.sqrt(Math.pow(sX - p.x, 2) + Math.pow(sY - p.y, 2)))
 		.reduce((acc, d) => (acc || 0) < d ? acc : d);
 
-	let opacity = 20 / d;
+	let opacity = (window.innerHeight / 20) / d;
 	
 	if (opacity > 1) {
 		opacity = 1;
@@ -166,14 +166,17 @@ function drawPiece(sX, sY, m) {
 }
 
 function drawBackground() {
-	ctx.canvas.width  = window.innerWidth;
-	ctx.canvas.height = window.innerHeight;
+	const ww = window.innerWidth;
+	const hh = window.innerHeight;
+
+	ctx.canvas.width  = ww;
+	ctx.canvas.height = hh;
 	
 	ctx.fillStyle = "#e8e8e8";
 	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 	
 	let x = 0;
-	let m = 10;
+	let m = Math.floor(hh / 50);
 	let h = 4;
 	let w = 4;
 	do{
