@@ -1,0 +1,230 @@
+<html>
+<body>
+	<header>
+		<h1>HEN LAB</h1>
+	</header>
+</body>
+<style>
+header {
+	margin-top: 20px;
+	text-align: center;
+}
+h1 {
+	background-color: rgba(232, 232, 232, .7)/*#e8e8e8*/;
+	display: inline-block;
+	padding: 10px;
+}
+html, body {
+  width:  100%;
+  height: 100%;
+  margin: 0;
+}
+</style>
+<script>
+
+let canvas = document.createElement("canvas");
+let ctx = canvas.getContext("2d");
+let outside = 1000;
+
+function rand(min, max) {
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+const particles = [];
+const maxParticles = 50;
+for (let i = 0; i < maxParticles; i++) {
+	particles.push(getParticle());
+}
+
+function getParticle(y) {
+	return {
+		x: rand(-outside, window.innerWidth + outside), 
+		y: y || rand(-outside, window.innerHeight + outside), 
+		v: rand(8, 19),
+	};
+}
+
+function updateParticles() {
+	particles.forEach(p => {
+		p.y += p.v;
+		p.x += p.v;
+	});
+
+	let leaving = particles.filter(p => {
+		return p.x < 0 || p.x > window.innerWidth || p.y < 0 || p.y > window.innerHeight;
+	});
+
+	if (leaving.length > 0 && particles.length < maxParticles) {
+		particles.push(getParticle(rand(-1000, -200)));
+	}
+
+	let left = particles.filter(p => {
+		return p.x < (0 - outside) ||
+		       p.x > (window.innerWidth + outside) ||
+		       p.y < (0 - outside) ||
+		       p.y > (window.innerHeight + outside);
+	});
+
+	left.forEach(p => {
+		particles.splice(particles.indexOf(p), 1);
+	});
+}
+
+function drawPiece(sX, sY, m) {
+	const d = particles
+		.map(p => Math.sqrt(Math.pow(sX - p.x, 2) + Math.pow(sY - p.y, 2)))
+		.reduce((acc, d) => (acc || 0) < d ? acc : d);
+
+	let opacity = 20 / d;
+	
+	if (opacity > 1) {
+		opacity = 1;
+	}
+
+	opacity *= .75;
+
+	ctx.strokeStyle = "rgba(0, 0, 0," + opacity + ")";
+
+	let x1, y1, x2, y2;
+	ctx.beginPath();
+
+	// 1
+	x1 = sX;
+	y1 = sY + 1 * m;
+	x2 = sX + 2 * m;
+	y2 = sY;
+	ctx.moveTo(x1, y1);
+	ctx.lineTo(x2, y2);
+
+	// 2
+	x1 = sX + 2 * m;
+	y1 = sY;
+	x2 = sX + 4 * m;
+	y2 = sY + m;
+	ctx.moveTo(x1, y1);
+	ctx.lineTo(x2, y2);
+
+	// 3
+	x1 = sX + 4 * m;
+	y1 = sY + 1 * m;
+	x2 = sX + 2 * m;
+	y2 = sY + 2 * m;
+	ctx.moveTo(x1, y1);
+	ctx.lineTo(x2, y2);
+
+	// 4
+	x1 = sX + 2 * m;
+	y1 = sY + 2 * m;
+	x2 = sX;
+	y2 = sY + m;
+	ctx.moveTo(x1, y1);
+	ctx.lineTo(x2, y2);
+
+	// 5
+	x1 = sX;
+	y1 = sY + m;
+	x2 = sX;
+	y2 = sY + 3 * m;
+	ctx.moveTo(x1, y1);
+	ctx.lineTo(x2, y2);
+
+	// 6
+	x1 = sX + 2 * m;
+	y1 = sY + 2 * m;
+	x2 = sX + 2 * m;
+	y2 = sY + 4 * m;
+	ctx.moveTo(x1, y1);
+	ctx.lineTo(x2, y2);
+
+	// 7
+	x1 = sX + 4 * m;
+	y1 = sY + 1 * m;
+	x2 = sX + 4 * m;
+	y2 = sY + 3 * m;
+	ctx.moveTo(x1, y1);
+	ctx.lineTo(x2, y2);
+
+	// 8
+	x1 = sX;
+	y1 = sY + 3 * m;
+	x2 = sX + 2 * m;
+	y2 = sY + 4 * m;
+	ctx.moveTo(x1, y1);
+	ctx.lineTo(x2, y2);
+
+	ctx.stroke();
+
+	// 9
+	x1 = sX + 2 * m;
+	y1 = sY + 4 * m;
+	x2 = sX + 4 * m;
+	y2 = sY + 3 * m;
+	ctx.moveTo(x1, y1);
+	ctx.lineTo(x2, y2);
+
+	ctx.stroke();
+}
+
+function drawBackground() {
+	ctx.canvas.width  = window.innerWidth;
+	ctx.canvas.height = window.innerHeight;
+	
+	ctx.fillStyle = "#e8e8e8";
+	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+	
+	let x = 0;
+	let m = 10;
+	let h = 4;
+	let w = 4;
+	do{
+		let y = 0;
+		do {
+			drawPiece(x, y, m);
+			y += h * m;
+		}
+		while (y < ctx.canvas.height);
+		x += w * m;
+	}
+	while (x < ctx.canvas.width);
+
+	document.body.style.background = 'url(' + canvas.toDataURL() + ')';
+}
+
+setInterval(() => {
+    updateParticles();
+	drawBackground();
+}, 50);
+
+</script>
+
+<!-- <script>
+let canvas = document.getElementById("canvas");
+let ctx = canvas.getContext("2d");
+
+
+function drawPiece(sX, sY, mag = 1) {
+	ctx.strokeStyle = "rgba(0, 0, 0, 0.4)";
+	ctx.beginPath();
+	ctx.moveTo(sX, sY);
+	ctx.lineTo(sX += 10 * mag, sY -= 5 * mag);
+	ctx.lineTo(sX += 10 * mag, sY += 5 * mag);
+	ctx.lineTo(sX -= 10 * mag, sY += 5 * mag);
+	ctx.lineTo(sX -= 10 * mag, sY -= 5 * mag); // back to the start
+	ctx.lineTo(sX * mag, sY += 15 * mag);
+	ctx.lineTo(sX += 10 * mag, sY += 5 * mag);
+	ctx.lineTo(sX * mag, sY -= 15 * mag);
+	ctx.stroke();
+}
+
+let mag = 5;
+let w = 0;
+for (let i = 0; i < 100; i++) {
+	drawPiece(w, 5, mag);
+	let h = 30;
+	for(let j = 0; j < 100; j++) {
+		drawPiece(w, h, mag);
+		h += 25;
+	}
+	w += 20;
+}
+</script> -->
